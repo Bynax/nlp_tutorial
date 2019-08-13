@@ -95,7 +95,6 @@ $$
   \begin{array}{c}{\text { Given } \theta, V_{T} \rightarrow \text { Estimate } p\left(V_{T} | \theta\right)} \\ {\quad \text { Where } \theta \rightarrow s, v, a_{i j}, b_{j k}}\end{array}
   $$
   
-
 - 方法
 
   首先直观的想法是使用全概率公式。因为每一个可观测变量都是由隐状态发射来的，计算每一个可能的状态序列的概率以及该状态序列得到观测变量的概率，然后加和得到结果。数学化的表达为：
@@ -190,14 +189,13 @@ $$
       \end{align}
       $$
       
-
-    - 理解：
-
-    后向计算的网格理解如下图：
-
-    ![backward](./pics/3.jpg)
-
-    其实这个的理解就是s1贡献的概率为$b_{1k}$，而$b_{1k}$由s2转化的概率为$a_{21}$。因此最后结果为：
+- 理解：
+    
+后向计算的网格理解如下图：
+    
+![backward](./pics/3.jpg)
+    
+其实这个的理解就是s1贡献的概率为$b_{1k}$，而$b_{1k}$由s2转化的概率为$a_{21}$。因此最后结果为：
     $$
     \beta_i(t)= \begin{cases} 
     1 & \text{ when }t = T \\ 
@@ -227,3 +225,14 @@ $$
 
 [1.Introduction to Hidden Markov Model](http://www.adeveloperdiary.com/data-science/machine-learning/introduction-to-hidden-markov-model/)
 
+[2.log-sum-exp-trick](http://bayesjumping.net/log-sum-exp-trick/)
+
+[3.HMM tutorial of standford](https://web.stanford.edu/~jurafsky/slp3/A.pdf)
+
+[4.HMM tutorial](http://www.cogsci.ucsd.edu/~ajyu/Readings/Tutorials/hmm.pdf)
+
+[5.HMM program](HMM_program/report.pdf)
+
+[6.HMM tutorial](https://pdfs.semanticscholar.org/08da/e3fc13807a3589cb06542ca3034bca983f08.pdf?_ga=2.210150742.2120317211.1565610140-372788760.1565271891)
+
+[7.HMM tutorial](http://www.iitg.ac.in/samudravijaya/tutorials/hmmTutorialDugadIITB96.pdf)
