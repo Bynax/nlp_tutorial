@@ -188,9 +188,10 @@ $$
       \beta_i(t+1) &= \text{ Backward probability at } t=t+1 
       \end{align}
       $$
-      
+  
 - 理解：
-    
+  
+
 后向计算的网格理解如下图：
     
 ![backward](./pics/3.jpg)
@@ -205,7 +206,84 @@ $$
 
 #### 学习问题（Learning ）
 
+- 问题定义
 
+  - 学习问题的目标是使用给定的训练数据去估计HMM中的A和B矩阵。
+  - HMM的标准训练算法是前-后向算法( `Forward-Backward algorithm` )或者称为`Baum-Welch Algorithm`，是EM（`Expectation Maximization`）算法的特例。
+
+- 方法（Baum-Welch Algorithm）
+
+  Baum-Welch算法（也叫前向-后向算法），是EM算法的一种形式，在HMM中的learning问题中大体步骤为：
+  
+  1. 首先初始化需要估计的参数 `[A,B]`，参数的初始化可以选择等概率或是取随机数进行初始化。
+  2. 计算转移矩阵和发射矩阵中各个元素被使用的期望。
+  3. 根据估计的隐变量的值重新估计参数。
+  4. 重复2、3直至收敛。
+  
+  使用MLE来估计A、B的话有：
+  $$
+  \hat{a_{ij}} = \frac{\text{expected number of transitions from hidden state i to state j}}{\text{expected number of transition from hidden state i}}
+  $$
+  
+  $$
+  \hat{b_{jk}} = \frac{\text{expected number of times in hidden state j and observing v(k) }}{\text{expected number of times in hidden state j}}
+  $$
+  
+  使用EM的方法有：假定使用$\hat{A}$ 来代表$a_{ij}$，使用$\hat{B}$来代表$b_{ij}$。
+  
+  - 关于$\hat{a_{ij}}$的推导
+  
+    对于t时刻状态为i，（t+1）时刻状态为j的概率我们可以表示为：
+    $$
+    p(s(t) = i,s(t+1)=j | V^T, \theta )
+    $$
+    根据概率论的知识，上式我们可以改写为：
+    $$
+    \begin{align} 
+    p(s(t) = i,s(t+1)=j | V^T, \theta ) &=\frac{ p(s(t) = i,s(t+1)=j , V^T | \theta )}{p(V^T| \theta )} 
+    \end{align}
+    $$
+    对于分子，我们可以使用之前的前向算法和后向算法计算出来
+    $$
+    \begin{align} 
+    p(s(t) = i,s(t+1)=j , V^T | \theta ) = \alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1) 
+    \end{align} \\ \\ \\
+    $$
+    其中 的第一项是前向的结果，这一项保证了前t项的观测序列，第二项是状态转移概率，第三项是发射概率，第四项是后向的结果，这一项保证了后面的观测序列。可以借助下图来理解：
+  
+    ![numerator](./pics/4.jpg)
+  
+    分母 $p(V^T|θ)$ 是给定任意一个模型，该观测序列的概率，可以使用边缘分布表示为：
+    $$
+    \begin{align} 
+    p(V^T | \theta ) = \sum_{i=1}^{M} \sum_{j=1}^{M} \alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1) 
+    \end{align}
+    $$
+    我们定义$\xi$ 作为隐变量代表$p(s(t) = i,s(t+1)=j | V^T, \theta )$，则可以定义$\xi_{ij}(t)$为：
+    $$
+    \xi_{ij} (t) = \frac{\alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1)}{\sum_{i=1}^{M} \sum_{j=1}^{M} \alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1)}
+    $$
+    以上只是计算出了一步的结果，要将T步的结果相加才能得到MLE中计算$\hat{a_{ij}}$的分子的部分。对于分母部分，则表示T时间内i转化的方式，则有如下公式：
+    $$
+    \sum_{t=1}^{T-1} \sum_{j=1}^{M} \xi_{ij} (t)
+    $$
+    故最后对$\hat{a}_{ij}$的估计值为：
+    $$
+    \hat{a_{ij}} = \frac{\sum_{t=1}^{T-1} \xi_{ij} (t)}{\sum_{t=1}^{T-1} \sum_{j=1}^{M} \xi_{ij} (t)} 
+    $$
+    
+  - 关于$\hat{b_{ij}}$的推导
+  
+    时刻t状态为j的概率为：
+    $$
+    \gamma_j(t) = \frac{\alpha_j(t) \beta_j(t)}{ \sum_{j=1}^M \alpha_j(t) \beta_j(t)}
+    $$
+    因此可以根据此估计出$\hat{b_{jk}}$
+    $$
+    \hat{b_{jk}} = \frac{\sum_{t=1}^T \gamma_j(t) 1(v(t)=k)}{\sum_{t=1}^T \gamma_j(t) }
+    $$
+    其中的$1(v(t)=k)$为`indicator function`.，也就是如果（v(t)=k）则为1否则为0。
+  
 
 #### 解码问题（Decoding）
 
@@ -217,9 +295,21 @@ $$
 
   同评估问题相同，依旧可以计算每个隐状态序列对应的概率，但是时间复杂度为$O(N^T\cdot T)$，这一指数级的复杂度依旧可以优化，因此引出了维特比算法（Viterbi Algorithm）。
 
-  - 
-
-
+  解码问题的思路和 `前向算法（Forward Algorithm）`. 在前向算法中，我们是通过给定的隐状态序列的和来计算可观测序列的而在解码问题中我们只需要求解在每次迭代中**最可能**的隐状态即可。
+  
+  假定下面的式子代表在前t个时刻的观测序列的最大概率（已经计算出来的）此时隐状态为i。
+  $$
+  \omega_{i}(t)=\max _{s_{1}, \ldots, s_{T-1}} p\left(s_{1}, s_{2} \ldots s_{T}=i, v_{1}, v_{2} \ldots v_{T} | \theta\right)
+  $$
+  则可以使用前向算法来计算$\omega_{i}(t+1)$。
+  $$
+  \omega_{i}(t+1)=\max _{i}\left(\omega_{i}(t) a_{i j} b_{j k v(t+1)}\right)
+  $$
+  除了计算概率之外，还要记录在每一步中使得概率最大的那个隐状态。因此共要有两个矩阵来完成。
+  
+  当对所有的可观察变量都完成上述计算后，就可以得到此时对应的概率最大的隐状态，然后通过不断的回溯来寻找该条路径。
+  
+  举例：[viterbi算法举例](http://www.adeveloperdiary.com/data-science/machine-learning/implement-viterbi-algorithm-in-hidden-markov-model-using-python-and-r/)
 
 ### 参考
 
