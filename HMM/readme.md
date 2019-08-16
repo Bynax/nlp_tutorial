@@ -283,6 +283,20 @@ $$
     \hat{b_{jk}} = \frac{\sum_{t=1}^T \gamma_j(t) 1(v(t)=k)}{\sum_{t=1}^T \gamma_j(t) }
     $$
     其中的$1(v(t)=k)$为`indicator function`.，也就是如果（v(t)=k）则为1否则为0。
+    
+  - 总结
+  
+    大体步骤即为：
+  
+    - 初始化A，B
+    - 重复以下步骤直至收敛
+      - E-step
+        - $\xi_{ij} (t) = \frac{\alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1)}{\sum_{i=1}^{M} \sum_{j=1}^{M} \alpha_i(t) a_{ij} b_{jk \text{ } v(t+1) }\beta_j(t+1)}$
+        - $\gamma_i(t) = \sum_{j=1}^M \xi_{ij}(t)$
+      - M-step
+        - $\hat{a_{ij}} = \frac{\sum_{t=1}^{T-1} \xi_{ij} (t)}{\sum_{t=1}^{T-1} \sum_{j=1}^{M} \xi_{ij} (t)}$
+        - $\hat{b_{jk}} = \frac{\sum_{t=1}^T \gamma_j(t) 1(v(t)=k)}{\sum_{t=1}^T \gamma_j(t) }$
+    - 返回A，B
   
 
 #### 解码问题（Decoding）
