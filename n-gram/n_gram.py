@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Created by bohuanshi on 2019/9/21
+
+# -*- coding: utf-8 -*-
 # Created by bohuanshi on 2019/9/18
 
 from nltk.corpus import reuters
@@ -15,20 +18,20 @@ def edits1(word):
     letters = 'abcdefghijklmnopqrstuvwxyz'
 
     word_length = len(word)
-    splits = [(word[:i], word[i:]) for i in range(word_length+1)]
+    splits = [(word[:i], word[i:]) for i in range(word_length + 1)]
 
     # insert
-    inserts = [L+c+R for L, R in splits for c in letters]
+    inserts = [L + c + R for L, R in splits for c in letters]
 
     # delete
-    deletes = [L+R[1:] for L, R in splits if R]
+    deletes = [L + R[1:] for L, R in splits if R]
 
     # replace
-    replacements = [L+c+R[1:] for L, R in splits if R for c in letters]
+    replacements = [L + c + R[1:] for L, R in splits if R for c in letters]
 
     # transposes
-    transposes = [L+R[1]+R[0]+R[2:] for L, R in splits if len(R) > 1]
-    return set(inserts+deletes+transposes+replacements)
+    transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R) > 1]
+    return set(inserts + deletes + transposes + replacements)
 
 
 def edit2(word):
@@ -58,11 +61,11 @@ def build_gram(corpus):
     term_count = {}
     bigram_count = {}
     for doc in corpus:
-        doc = ['<s>']+doc
+        doc = ['<s>'] + doc
         doc_lenght = len(doc)
-        for i in range(0, doc_lenght-1):
+        for i in range(0, doc_lenght - 1):
             term = doc[i]
-            bigram = ' '.join(doc[i:i+2])
+            bigram = ' '.join(doc[i:i + 2])
 
             if term in term_count:
                 term_count[term] += 1
@@ -73,6 +76,8 @@ def build_gram(corpus):
             else:
                 bigram_count[bigram] = 1
     return term_count, bigram_count
+
+
 # sklearn有现成的包可以使用
 
 
@@ -91,7 +96,7 @@ def error_probability(spell_error_path):
         error_prob[correct] = {}
         mistakes_len = len(mistakes)
         for mistake in mistakes:
-            error_prob[correct][mistake] = 1.0/mistakes_len
+            error_prob[correct][mistake] = 1.0 / mistakes_len
     return error_prob
 
 
@@ -135,11 +140,25 @@ if __name__ == "__main__":
                     # 计算Language Model的概率
                     # 在这里考虑Bigram，即一个词语的p(w|w-1)和p(w+1|w)
                     V = len(term_count.keys())
-                    if items[2][idx-1] in bigram_count and candidate in bigram_count[items[2][idx-1]]:
-                        prob += np.log((bigram_count[items[2][idx]][candidate]+1)/(term_count[items[2][idx-1]]+V))
+                    if items[2][idx - 1] in bigram_count and candidate in bigram_count[items[2][idx - 1]]:
+                        prob += np.log((bigram_count[items[2][idx]][candidate] + 1) / (term_count[items[2][idx - 1]] + V))
                     else:
-                        prob += np.log(1.0/V)
-                    if prob > max_prob:
-                        max_prob= prob
-                        max_idx= idx
-                print(word, candidates[max_idx])
+                        prob += np.log(1.0 / V)
+
+                        """
+                        idx = items[2].index(word)+1
+                    if items[2][idx - 1] in bigram_count and candi in bigram_count[items[2][idx - 1]]:
+                        prob += np.log((bigram_count[items[2][idx - 1]][candi] + 1.0) / (
+                                term_count[bigram_count[items[2][idx - 1]]] + V))
+                    # TODO: 也要考虑当前 [word, post_word]
+                    #   prob += np.log(bigram概率)
+    
+                    else:
+                        prob += np.log(1.0 / V)
+    
+                    probs.append(prob)
+                        """
+                        if prob > max_prob:
+                            max_prob = prob
+                        max_idx = idx
+                        print(word, candidates[max_idx])
