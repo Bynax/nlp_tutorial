@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # Created by bohuanshi on 2019/9/21
 
-# -*- coding: utf-8 -*-
-# Created by bohuanshi on 2019/9/18
-
 from nltk.corpus import reuters
 import numpy as np
 
@@ -141,7 +138,8 @@ if __name__ == "__main__":
                     # 在这里考虑Bigram，即一个词语的p(w|w-1)和p(w+1|w)
                     V = len(term_count.keys())
                     if items[2][idx - 1] in bigram_count and candidate in bigram_count[items[2][idx - 1]]:
-                        prob += np.log((bigram_count[items[2][idx]][candidate] + 1) / (term_count[items[2][idx - 1]] + V))
+                        prob += np.log(
+                            (bigram_count[items[2][idx]][candidate] + 1) / (term_count[items[2][idx - 1]] + V))
                     else:
                         prob += np.log(1.0 / V)
 
